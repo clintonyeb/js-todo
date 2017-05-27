@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>JS Todo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./assets/css/styles.css" rel="stylesheet">
+    <link href="./assets/css/bulma.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body>
+    <div class="columns">
+        <div class="column">
+
+        </div>
+        <div class="column">
+            <div class="box">
+                <div class="field has-addons has-addons-centered">
+                    <p class="control">
+                        <span class="select">
+                            <select id="input-type">
+                                <option selected value="add">Add</option>
+                                <option value="search">Search</option>
+                            </select>
+                        </span>
+                    </p>
+                    <p class="control is-expanded">
+                        <input type="text" class="input" placeholder="Add new todo" name="text-box">
+                    </p>
+                    <p class="control">
+                        <a id="actionBtn" class="button is-info">Add</a>
+                    </p>
+                </div>
+                <div class="notification is-danger is-hidden" id="notify">
+                    <button class="delete" id="notify-btn"></button> Cannot add duplicate todo items
+                </div>
+                <ul id="todoList"></ul>
+            </div>
+        </div>
+        <div class="column">
+
+        </div>
+    </div>
+
+    <script>
+        'use strict';
+
+        function documentLoaded() {
+
+            // DOM Elements
+            let actionBtn = document.getElementById('actionBtn');
+            let listEl = document.getElementById('todoList');
+            let inputEl = document.getElementsByName('text-box')[0];
+            let inputType = document.getElementById('input-type');
+            let notify = document.getElementById('notify');
+            let notifyBtn = document.getElementById('notify-btn');
+
+            // state variables
+            let todos = [];
+            let _id = 0;
+
+            function Todo(text) {
+                this.id = ++_id;
+                this.text = text;
+                this.date = new Date();
+                this.completed = false;
+                this.deadline = false;
+            }
+
+            Todo.prototype.edit = function (option) {
+                if (option.toString() != '[Object object]') {
+                    return;
+                }
+                this.text = option.text || this.text;
+                this.completed = option.completed || this.completed;
+                this.text = option.deadline || this.deadline;
+            }
+
+            Todo.prototype.delete = function () {
+                return todos = todos.filter((val) => {
+                    this.id !== val.id;
+                })
+            }
+
+            Todo.prototype.add = function () {
+                let duplicate = false;
+                todos.forEach((todo) => {
+                    if (this.text === todo.text) {
+                        duplicate = true;
+                        notify.className = 'notification is-danger';
+                    }
+                })
+
+                if (!duplicate) {
+                    todos.push(this);
+                    return true;
+                }
+
+                return false;
+            }
+
+            function updateView(todo) {
+                todos.forEach((val) => {
+                    if (!val.displayed) {
+                        let icon = document.createElement('i');
+                        icon.className = 'fa fa-handshake-o'
+                        let item = document.createElement('li');
+                        item.appendChild(icon);
+                        let text = document.createTextNode(' ' + todo.text);
+                        item.appendChild(text);
+                        listEl.appendChild(item);
+                        todo.displayed = true;
+                    }
+                })
+
+            }
+
+            function inputTypeChanged(e) {
+                let target = e.target;
+                if (target.value === 'add') {
+                    inputEl.placeholder = 'Add new todo'
+                    actionBtn.textContent = 'Add';
+                } else if (target.value === 'search') {
+                    inputEl.placeholder = 'Search new todo'
+                    actionBtn.textContent = 'Search';
+                }
+            }
+
+            function addNewTodo(e) {
+
+                if (e.keyCode && e.keyCode !== 13) {
+                    return;
+                }
+
+                let text = inputEl.value;
+                if (!text) return;
+                let type = inputType.value;
+
+                if (type === 'add') {
+                    let todo = new Todo(text);
+                    if (todo.add()) {
+                        updateView(todo);
+                        inputEl.value = "";
+                    }
+                }
+            }
+
+            function removeNotify() {
+                notify.className = 'notification is-danger is-hidden';
+            }
+
+            actionBtn.addEventListener('click', addNewTodo);
+            inputEl.addEventListener('keydown', addNewTodo);
+            notifyBtn.addEventListener('click', removeNotify);
+
+            inputType.addEventListener('change', inputTypeChanged);
+
+        } // end of documentLoaded
+
+        window.addEventListener('load', documentLoaded);
+    </script>
+
+</body>
+
+</html>
